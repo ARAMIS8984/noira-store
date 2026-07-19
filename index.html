@@ -36,6 +36,7 @@
     --dark-muted:#8A8A92;
     --dark-accent:#A8875A;
     --dark-accent-2:#7A2E36;
+    --dark-rail:#D6D6D2;
     --dark-border:#2C2C34;
 
     --light-bg:#FBF3EE;
@@ -224,10 +225,10 @@
     transition:transform .35s cubic-bezier(.65,0,.35,1), background-color .35s ease;
     z-index:1;
   }
-  body[data-theme="hombre"] .rail-pill{ background:var(--dark-accent); }
+  body[data-theme="hombre"] .rail-pill{ background:var(--dark-rail); }
   body[data-theme="mujer"] .rail-pill{ background:var(--light-accent); }
   body[data-theme="mujer"] .rail-toggle .rail-pill{ transform:translateX(100%); }
-  body[data-theme="hombre"] .rail-toggle button:first-child,
+  body[data-theme="hombre"] .rail-toggle button:first-child{ color:#15151A; }
   body[data-theme="mujer"] .rail-toggle button:last-child{ color:#fff; }
 
   .top-bar-right{ display:flex; align-items:center; gap:.9rem; }
@@ -547,7 +548,7 @@
 
   <section id="catalog">
     <div class="top-bar">
-      <div class="brand">NOIRA</div>
+      <div class="brand" id="brandHome" style="cursor:pointer;">NOIRA</div>
       <div class="top-bar-right">
         <div class="rail-toggle">
           <div class="rail-pill"></div>
@@ -753,6 +754,12 @@
 
   document.querySelectorAll('[data-choose]').forEach(btn=>{
     btn.addEventListener('click', ()=> chooseGender(btn.dataset.choose));
+  });
+
+  document.getElementById('brandHome').addEventListener('click', ()=>{
+    document.getElementById('catalog').classList.remove('show');
+    document.getElementById('landing').classList.remove('hide');
+    document.body.setAttribute('data-theme', 'neutral');
   });
 
   document.querySelectorAll('.tab').forEach(tab=>{
