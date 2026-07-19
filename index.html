@@ -64,7 +64,7 @@
   }
 
   a{color:inherit; text-decoration:none;}
-  button{font-family:inherit; cursor:pointer; border:none; background:none;}
+  button{font-family:inherit; cursor:pointer; border:none; background:none; color:inherit;}
   :focus-visible{outline:2px solid currentColor; outline-offset:3px;}
 
   /* ===================== LANDING (selector) ===================== */
@@ -587,6 +587,33 @@
   @media (max-width:640px){
     .adm-grid-2, .adm-grid-3{ grid-template-columns:1fr; }
   }
+
+  .size-picker{ display:flex; flex-wrap:wrap; gap:.5rem; }
+  .size-chip{
+    padding:.4rem .8rem; border-radius:6px; font-size:.78rem;
+    border:1px solid var(--adm-border); background:var(--adm-surface-2); color:var(--adm-text);
+    transition:background-color .2s ease, border-color .2s ease;
+  }
+  .size-chip.selected{ background:var(--adm-accent); border-color:var(--adm-accent); color:#15151A; font-weight:600; }
+
+  .color-list{ display:flex; flex-direction:column; gap:.6rem; margin-top:.9rem; }
+  .color-row{
+    display:flex; align-items:center; gap:.75rem;
+    background:var(--adm-surface-2); border:1px solid var(--adm-border);
+    border-radius:6px; padding:.6rem .7rem;
+  }
+  .color-row-thumb{
+    width:38px; height:38px; border-radius:5px; background-size:cover; background-position:center;
+    background-color:var(--adm-surface); flex-shrink:0; border:1px solid var(--adm-border);
+  }
+  .color-row-name{ font-size:.82rem; font-weight:600; }
+  .color-row-status{ font-size:.68rem; color:var(--adm-muted); }
+  .color-row-actions{ margin-left:auto; display:flex; align-items:center; gap:.6rem; }
+  .color-row-actions label{
+    font-size:.68rem; color:var(--adm-accent); text-decoration:underline; cursor:pointer; margin:0; text-transform:none;
+  }
+  .color-row-remove{ font-size:.75rem; color:var(--adm-danger); }
+  .color-row-remove:hover{ text-decoration:underline; }
 </style>
 </head>
 <body data-theme="neutral">
@@ -745,6 +772,7 @@
               <select id="f_gender" required>
                 <option value="hombre">Hombre</option>
                 <option value="mujer">Mujer</option>
+                <option value="unisex">Unisex (ambos catálogos)</option>
               </select>
             </div>
             <div class="adm-field">
@@ -776,14 +804,19 @@
             <label for="f_on_launch" style="margin:0; text-transform:none; font-size:.8rem; color:var(--adm-text);">Marcar como lanzamiento</label>
           </div>
 
-          <div class="adm-grid-2" style="margin-top:1rem;">
-            <div class="adm-field">
-              <label>Tallas disponibles</label>
-              <input type="text" id="f_sizes" placeholder="Ej: 38, 39, 40, 41">
-            </div>
-            <div class="adm-field">
-              <label>Colores disponibles</label>
-              <input type="text" id="f_colors" placeholder="Ej: Negro, Blanco, Azul">
+          <div class="adm-field" style="margin-top:1rem;">
+            <label>Tallas disponibles <span style="text-transform:none; opacity:.6;">(según categoría)</span></label>
+            <div class="size-picker" id="sizePicker"></div>
+          </div>
+
+          <div class="adm-field" style="margin-top:1.2rem;">
+            <label>Colores disponibles <span style="text-transform:none; opacity:.6;">(opcional: imagen por color)</span></label>
+            <div class="color-builder">
+              <div style="display:flex; gap:.6rem;">
+                <input type="text" id="newColorName" placeholder="Nombre del color, ej: Negro" style="flex:1;">
+                <button type="button" class="adm-btn ghost" id="addColorBtn" style="width:auto; padding:.55rem 1.1rem;">+ Agregar color</button>
+              </div>
+              <div id="colorList" class="color-list"></div>
             </div>
           </div>
 
@@ -885,7 +918,7 @@
     const { data, error } = await sb
       .from('noira_public_products')
       .select('*')
-      .eq('gender', state.gender)
+      .in('gender', [state.gender, 'unisex'])
       .eq('category', state.category)
       .order('created_at', { ascending: false });
 
@@ -1086,6 +1119,10 @@
           colorsWrap.querySelectorAll('.pd-pill').forEach(b=>b.classList.remove('selected'));
           btn.classList.add('selected');
           document.getElementById('pdMsg').textContent = '';
+          const swapImg = (p.color_images && p.color_images[pdSelectedColor]) || p.image_url;
+          const imgEl = document.getElementById('pdImg');
+          imgEl.style.backgroundImage = swapImg ? `url('${swapImg}')` : '';
+          imgEl.textContent = swapImg ? '' : 'Sin imagen';
         });
       });
     } else { colorsGroup.style.display = 'none'; }
@@ -1116,7 +1153,7 @@
       brand: p.brand,
       name: p.name,
       price: Number(hasSale ? p.sale_price : p.price),
-      image_url: p.image_url || '',
+      image_url: (p.color_images && pdSelectedColor && p.color_images[pdSelectedColor]) || p.image_url || '',
       size: pdSelectedSize,
       color: pdSelectedColor
     });
@@ -1209,6 +1246,83 @@
     if(url) pendingVideoUrl = url;
   });
 
+  // --- Tallas seleccionables según categoría ---
+  const SIZE_SETS = {
+    tenis: ['34','35','36','37','38','39','40','41','42','43','44','45','46'],
+    ropa: ['XS','S','M','L','XL','XXL']
+  };
+  let selectedSizes = [];
+
+  function renderSizePicker(category, preselected){
+    preselected = preselected || [];
+    const wrap = document.getElementById('sizePicker');
+    const options = SIZE_SETS[category] || SIZE_SETS.tenis;
+    selectedSizes = options.filter(s => preselected.includes(s));
+    wrap.innerHTML = options.map(s=>`<button type="button" class="size-chip${preselected.includes(s) ? ' selected' : ''}" data-size="${s}">${s}</button>`).join('');
+    wrap.querySelectorAll('.size-chip').forEach(chip=>{
+      chip.addEventListener('click', ()=>{
+        const s = chip.dataset.size;
+        chip.classList.toggle('selected');
+        if(chip.classList.contains('selected')){ selectedSizes.push(s); }
+        else { selectedSizes = selectedSizes.filter(x=>x!==s); }
+      });
+    });
+  }
+
+  document.getElementById('f_category').addEventListener('change', (e)=>{
+    renderSizePicker(e.target.value, []);
+  });
+
+  // --- Constructor de colores con imagen por color ---
+  let formColors = []; // [{ name, image_url }]
+
+  function renderColorList(){
+    const wrap = document.getElementById('colorList');
+    wrap.innerHTML = formColors.map((c,i)=>`
+      <div class="color-row">
+        <div class="color-row-thumb" style="${c.image_url ? `background-image:url('${c.image_url}')` : ''}"></div>
+        <div>
+          <div class="color-row-name">${c.name}</div>
+          <div class="color-row-status" data-status="${i}">${c.image_url ? 'Imagen cargada' : 'Sin imagen (usará la principal)'}</div>
+        </div>
+        <div class="color-row-actions">
+          <label>Subir imagen<input type="file" accept="image/*" data-color-file="${i}" style="display:none;"></label>
+          <button type="button" class="color-row-remove" data-remove-color="${i}">Eliminar</button>
+        </div>
+      </div>
+    `).join('');
+
+    wrap.querySelectorAll('[data-color-file]').forEach(input=>{
+      input.addEventListener('change', async (e)=>{
+        const idx = Number(input.dataset.colorFile);
+        const file = e.target.files[0];
+        if(!file) return;
+        const statusEl = wrap.querySelector(`[data-status="${idx}"]`);
+        statusEl.textContent = 'Subiendo...';
+        const url = await uploadToBucket(file, statusEl);
+        if(url){ formColors[idx].image_url = url; renderColorList(); }
+      });
+    });
+    wrap.querySelectorAll('[data-remove-color]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        formColors.splice(Number(btn.dataset.removeColor), 1);
+        renderColorList();
+      });
+    });
+  }
+
+  document.getElementById('addColorBtn').addEventListener('click', ()=>{
+    const input = document.getElementById('newColorName');
+    const name = input.value.trim();
+    if(!name) return;
+    if(formColors.some(c=>c.name.toLowerCase() === name.toLowerCase())) { input.value=''; return; }
+    formColors.push({ name, image_url: null });
+    input.value = '';
+    renderColorList();
+  });
+
+  renderSizePicker('tenis', []);
+
   // --- Guardar / actualizar producto ---
   function resetForm(){
     document.getElementById('productForm').reset();
@@ -1219,6 +1333,9 @@
     document.getElementById('vidStatus').textContent = '';
     pendingImageUrl = null;
     pendingVideoUrl = null;
+    formColors = [];
+    renderColorList();
+    renderSizePicker('tenis', []);
   }
 
   document.getElementById('cancelEditBtn').addEventListener('click', resetForm);
@@ -1229,10 +1346,10 @@
     const btn = document.getElementById('submitBtn');
     btn.disabled = true;
 
-    const sizesRaw = document.getElementById('f_sizes').value;
-    const sizes = sizesRaw.split(',').map(s=>s.trim()).filter(Boolean);
-    const colorsRaw = document.getElementById('f_colors').value;
-    const colors = colorsRaw.split(',').map(s=>s.trim()).filter(Boolean);
+    const sizes = selectedSizes.slice();
+    const colors = formColors.map(c=>c.name);
+    const color_images = {};
+    formColors.forEach(c=>{ if(c.image_url) color_images[c.name] = c.image_url; });
     const editingId = document.getElementById('editingId').value;
 
     const payload = {
@@ -1246,6 +1363,7 @@
       on_launch: document.getElementById('f_on_launch').checked,
       sizes: sizes,
       colors: colors,
+      color_images: color_images,
       description: document.getElementById('f_description').value.trim() || null,
       active: document.getElementById('f_active').value === 'true'
     };
@@ -1325,8 +1443,9 @@
         document.getElementById('f_sale_price').value = p.sale_price || '';
         document.getElementById('f_cost').value = p.cost || '';
         document.getElementById('f_on_launch').checked = !!p.on_launch;
-        document.getElementById('f_sizes').value = (p.sizes||[]).join(', ');
-        document.getElementById('f_colors').value = (p.colors||[]).join(', ');
+        renderSizePicker(p.category, p.sizes||[]);
+        formColors = (p.colors||[]).map(name => ({ name, image_url: (p.color_images && p.color_images[name]) || null }));
+        renderColorList();
         document.getElementById('f_description').value = p.description || '';
         document.getElementById('f_active').value = p.active ? 'true' : 'false';
         pendingImageUrl = null; pendingVideoUrl = null;
