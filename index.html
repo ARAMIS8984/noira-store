@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NOIRA — Un nombre. Dos esencias.</title>
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,400..900;1,400..900&family=Work+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --font-display:'Bodoni Moda', serif;
+    --font-body:'Work Sans', sans-serif;
+    --font-mono:'JetBrains Mono', monospace;
+    --radius:2px;
+    --dark-bg:#15151A;
+    --dark-surface:#1D1D23;
+    --dark-text:#ECECE8;
+    --dark-muted:#8A8A92;
+    --dark-accent:#4A6FA5;
+    --dark-accent-2:#9A3B44;
+    --dark-border:#2C2C34;
+
+    --light-bg:#FBF3EE;
+    --light-surface:#FFFFFF;
+    --light-text:#2B1B24;
+    --light-muted:#9C818A;
+    --light-accent:#C97B84;
+    --light-accent-2:#B08A4E;
+    --light-border:#EBD9D0;
+  }
+
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:var(--font-body);
+    min-height:100vh;
+    overflow-x:hidden;
+    background:var(--dark-bg);
+    color:var(--dark-text);
+    transition:background-color .5s ease, color .5s ease;
+  }
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+    *{transition-duration:.01ms !important; animation-duration:.01ms !important;}
+  }
+
+  a{color:inherit; text-decoration:none;}
+  button{font-family:inherit; cursor:pointer; border:none; background:none;}
+  :focus-visible{outline:2px solid currentColor; outline-offset:3px;}
+
+  /* ===================== LANDING (selector) ===================== */
+  #landing{
+    position:relative;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:linear-gradient(90deg,
+      var(--dark-bg) 0%, var(--dark-bg) 48%,
+      var(--light-bg) 52%, var(--light-bg) 100%);
+    overflow:hidden;
+  }
+  #landing::before{
+    content:'';
+    position:absolute; inset:0;
+    background:linear-gradient(90deg, transparent 45%, rgba(0,0,0,.22) 50%, transparent 55%);
+    pointer-events:none;
+  }
+  .landing-inner{
+    position:relative;
+    z-index:2;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:2.2rem;
+    text-align:center;
+    padding:2rem;
+  }
+
+  .wordmark-wrap{ position:relative; display:inline-block; }
+  .wordmark{
+    display:block;
+    font-family:var(--font-display);
+    font-weight:800;
+    font-size:clamp(3.2rem, 12vw, 8rem);
+    letter-spacing:.04em;
+    line-height:1;
+    white-space:nowrap;
+    user-select:none;
+  }
+  .wordmark-dark{
+    color:#fff;
+    text-shadow:0 3px 2px rgba(0,0,0,.55), 0 -1px 0 rgba(255,255,255,.2);
+    clip-path:inset(0 50% 0 0);
+  }
+  .wordmark-light{
+    position:absolute; top:0; left:0;
+    color:var(--light-text);
+    text-shadow:0 1px 0 rgba(255,255,255,.75), 0 -1px 0 rgba(0,0,0,.12);
+    clip-path:inset(0 0 0 50%);
+  }
+  .letter{
+    display:inline-block;
+    transition:color .45s ease, text-shadow .45s ease, transform .45s ease;
+  }
+  .wordmark-dark .letter:hover{
+    color:#E9D2A8;
+    text-shadow:0 0 16px rgba(233,210,168,.55), 0 3px 2px rgba(0,0,0,.4);
+    transform:translateY(-4px);
+  }
+  .wordmark-light .letter:hover{
+    color:#A97A3E;
+    text-shadow:0 0 12px rgba(169,122,62,.4), 0 1px 0 rgba(255,255,255,.6);
+    transform:translateY(-4px);
+  }
+  .seam-line{
+    position:absolute; top:6%; bottom:6%; left:50%;
+    width:2px; transform:translateX(-50%);
+    background:linear-gradient(180deg, transparent, #D9BC85 18%, #D9BC85 82%, transparent);
+    box-shadow:0 0 10px rgba(217,188,133,.55);
+  }
+
+  .tagline-wrap{ position:relative; display:inline-block; }
+  .tagline-half{
+    display:block;
+    font-family:var(--font-body);
+    font-weight:400;
+    font-size:.85rem;
+    letter-spacing:.28em;
+    text-transform:uppercase;
+    white-space:nowrap;
+  }
+  .tagline-dark{ color:rgba(255,255,255,.9); clip-path:inset(0 50% 0 0); }
+  .tagline-light{
+    position:absolute; top:0; left:0;
+    color:rgba(43,27,36,.78);
+    clip-path:inset(0 0 0 50%);
+  }
+
+  .gender-picks{ display:flex; gap:1.1rem; }
+  .gender-picks button{
+    padding:.9rem 2.3rem;
+    font-family:var(--font-body);
+    font-size:.78rem;
+    font-weight:600;
+    letter-spacing:.2em;
+    border-radius:999px;
+    transition:background-color .25s ease, color .25s ease;
+  }
+  .pick-dark{
+    color:#fff;
+    border:1px solid rgba(255,255,255,.65);
+    background:rgba(255,255,255,.05);
+  }
+  .pick-dark:hover{ background:#fff; color:var(--dark-bg); }
+  .pick-light{
+    color:var(--light-text);
+    border:1px solid rgba(43,27,36,.5);
+    background:rgba(255,255,255,.5);
+  }
+  .pick-light:hover{ background:var(--light-text); color:var(--light-bg); }
+
+  /* ===================== CATALOG ===================== */
+  #catalog{ display:none; min-height:100vh; }
+  #catalog.show{ display:block; }
+  #landing.hide{ display:none; }
+
+  body[data-theme="hombre"] #catalog{
+    background:var(--dark-bg); color:var(--dark-text);
+  }
+  body[data-theme="mujer"] #catalog{
+    background:var(--light-bg); color:var(--light-text);
+  }
+
+  .top-bar{
+    position:sticky; top:0; z-index:20;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:1.1rem 1.75rem;
+    backdrop-filter:blur(10px);
+  }
+  body[data-theme="hombre"] .top-bar{ background:rgba(21,21,26,.85); border-bottom:1px solid var(--dark-border); }
+  body[data-theme="mujer"] .top-bar{ background:rgba(251,243,238,.85); border-bottom:1px solid var(--light-border); }
+
+  .brand{
+    font-family:var(--font-display);
+    font-weight:700;
+    font-size:1.5rem;
+    letter-spacing:.05em;
+  }
+
+  .rail-toggle{
+    display:flex; align-items:center; position:relative;
+    border-radius:999px; padding:3px; font-size:.68rem;
+    letter-spacing:.14em; font-weight:600;
+  }
+  body[data-theme="hombre"] .rail-toggle{ background:var(--dark-surface); border:1px solid var(--dark-border); }
+  body[data-theme="mujer"] .rail-toggle{ background:var(--light-surface); border:1px solid var(--light-border); }
+  .rail-toggle button{
+    position:relative; z-index:2;
+    padding:.5rem 1.1rem; border-radius:999px;
+    transition:color .3s ease;
+  }
+  .rail-pill{
+    position:absolute; top:3px; bottom:3px; left:3px;
+    width:calc(50% - 3px); border-radius:999px;
+    transition:transform .35s cubic-bezier(.65,0,.35,1), background-color .35s ease;
+    z-index:1;
+  }
+  body[data-theme="hombre"] .rail-pill{ background:var(--dark-accent); }
+  body[data-theme="mujer"] .rail-pill{ background:var(--light-accent); }
+  body[data-theme="mujer"] .rail-toggle .rail-pill{ transform:translateX(100%); }
+  body[data-theme="hombre"] .rail-toggle button:first-child,
+  body[data-theme="mujer"] .rail-toggle button:last-child{ color:#fff; }
+
+  .hero-strip{
+    padding:3.5rem 1.75rem 2.5rem;
+    text-align:center;
+  }
+  .hero-strip h1{
+    font-family:var(--font-display);
+    font-weight:600;
+    font-style:italic;
+    font-size:clamp(1.8rem, 4.5vw, 3rem);
+    letter-spacing:.01em;
+  }
+  .hero-strip p{
+    margin-top:.6rem; font-size:.85rem; letter-spacing:.08em;
+    text-transform:uppercase;
+  }
+  body[data-theme="hombre"] .hero-strip p{ color:var(--dark-muted); }
+  body[data-theme="mujer"] .hero-strip p{ color:var(--light-muted); }
+
+  .tabs{
+    display:flex; justify-content:center; gap:.5rem;
+    padding:0 1.75rem 2rem;
+  }
+  .tab{
+    position:relative;
+    padding:.6rem 1.6rem;
+    font-size:.72rem; font-weight:600; letter-spacing:.18em;
+    clip-path:polygon(8% 0,100% 0,92% 100%,0 100%);
+  }
+  body[data-theme="hombre"] .tab{ color:var(--dark-muted); }
+  body[data-theme="mujer"] .tab{ color:var(--light-muted); }
+  .tab.active{ }
+  body[data-theme="hombre"] .tab.active{ color:var(--dark-text); background:var(--dark-surface); }
+  body[data-theme="mujer"] .tab.active{ color:var(--light-text); background:var(--light-surface); }
+
+  .grid{
+    max-width:1200px; margin:0 auto;
+    display:grid; grid-template-columns:repeat(auto-fill, minmax(230px,1fr));
+    gap:1.6rem; padding:0 1.75rem 4rem;
+  }
+  .card{
+    border-radius:var(--radius);
+    overflow:hidden;
+    transition:transform .3s ease, box-shadow .3s ease;
+  }
+  .card:hover{ transform:translateY(-4px); }
+  body[data-theme="hombre"] .card{ background:var(--dark-surface); border:1px solid var(--dark-border); }
+  body[data-theme="mujer"] .card{ background:var(--light-surface); border:1px solid var(--light-border); }
+
+  .card-img{
+    aspect-ratio:1/1; width:100%;
+    display:flex; align-items:center; justify-content:center;
+    background-size:cover; background-position:center;
+    font-size:.7rem; letter-spacing:.1em; text-transform:uppercase;
+  }
+  body[data-theme="hombre"] .card-img{ background-color:#101014; color:var(--dark-muted); }
+  body[data-theme="mujer"] .card-img{ background-color:#F3E6DF; color:var(--light-muted); }
+
+  .card-body{ padding:1rem 1.1rem 1.2rem; }
+  .card-brand{
+    font-family:var(--font-mono);
+    font-size:.65rem; letter-spacing:.14em; text-transform:uppercase;
+  }
+  body[data-theme="hombre"] .card-brand{ color:var(--dark-accent); }
+  body[data-theme="mujer"] .card-brand{ color:var(--light-accent-2); }
+  .card-name{ font-size:1rem; font-weight:500; margin:.35rem 0 .15rem; }
+  .card-sizes{ font-size:.72rem; margin-bottom:.7rem; }
+  body[data-theme="hombre"] .card-sizes{ color:var(--dark-muted); }
+  body[data-theme="mujer"] .card-sizes{ color:var(--light-muted); }
+  .card-foot{ display:flex; align-items:center; justify-content:space-between; gap:.5rem; }
+  .card-price{ font-family:var(--font-mono); font-weight:600; font-size:1rem; }
+  .wa-btn{
+    display:inline-flex; align-items:center; gap:.35rem;
+    padding:.55rem 1rem; border-radius:999px;
+    font-size:.7rem; font-weight:600; letter-spacing:.06em;
+    transition:opacity .2s ease;
+  }
+  .wa-btn:hover{ opacity:.85; }
+  body[data-theme="hombre"] .wa-btn{ background:var(--dark-accent-2); color:#fff; }
+  body[data-theme="mujer"] .wa-btn{ background:var(--light-accent-2); color:#fff; }
+
+  .empty-state{
+    max-width:1200px; margin:0 auto; padding:3rem 1.75rem 5rem;
+    text-align:center; font-size:.9rem; letter-spacing:.03em;
+  }
+  body[data-theme="hombre"] .empty-state{ color:var(--dark-muted); }
+  body[data-theme="mujer"] .empty-state{ color:var(--light-muted); }
+
+  footer{
+    padding:2.2rem 1.75rem; text-align:center;
+    font-family:var(--font-mono); font-size:.65rem; letter-spacing:.1em;
+  }
+  body[data-theme="hombre"] footer{ border-top:1px solid var(--dark-border); color:var(--dark-muted); }
+  body[data-theme="mujer"] footer{ border-top:1px solid var(--light-border); color:var(--light-muted); }
+
+  @media (max-width:560px){
+    .gender-picks{ flex-direction:column; align-items:center; gap:.75rem; }
+  }
+</style>
+</head>
+<body data-theme="neutral">
+
+  <section id="landing">
+    <div class="landing-inner">
+      <div class="wordmark-wrap">
+        <span class="wordmark wordmark-dark"><span class="letter">N</span><span class="letter">O</span><span class="letter">I</span><span class="letter">R</span><span class="letter">A</span></span>
+        <span class="wordmark wordmark-light" aria-hidden="true"><span class="letter">N</span><span class="letter">O</span><span class="letter">I</span><span class="letter">R</span><span class="letter">A</span></span>
+        <span class="seam-line"></span>
+      </div>
+      <div class="tagline-wrap">
+        <span class="tagline-half tagline-dark">Un nombre. Dos esencias.</span>
+        <span class="tagline-half tagline-light" aria-hidden="true">Un nombre. Dos esencias.</span>
+      </div>
+      <div class="gender-picks">
+        <button type="button" class="pick-dark" data-choose="hombre">Hombre</button>
+        <button type="button" class="pick-light" data-choose="mujer">Mujer</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="catalog">
+    <div class="top-bar">
+      <div class="brand">NOIRA</div>
+      <div class="rail-toggle">
+        <div class="rail-pill"></div>
+        <button type="button" data-choose="hombre">Hombre</button>
+        <button type="button" data-choose="mujer">Mujer</button>
+      </div>
+    </div>
+
+    <div class="hero-strip">
+      <h1 id="heroTitle">La colección para él</h1>
+      <p id="heroSub">Tenis y ropa seleccionados</p>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" data-cat="tenis">Tenis</button>
+      <button class="tab" data-cat="ropa">Ropa</button>
+    </div>
+
+    <div class="grid" id="grid"></div>
+    <div class="empty-state" id="emptyState" style="display:none;">Aún no hay productos cargados en esta categoría. Vuelve pronto.</div>
+
+    <footer>NOIRA © 2026 — Pedidos por WhatsApp</footer>
+  </section>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+  const SUPABASE_URL = 'https://dwmcoigymyolmblmhwjd.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR3bWNvaWd5bXlvbG1ibG1od2pkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM4NjU3OTIsImV4cCI6MjA5OTQ0MTc5Mn0.sN0MRi27neNAusHmakwV6P44WrtDgjn9M4Ge3JbjIV8';
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  const WHATSAPP_NUMBER = '573006586453';
+
+  let state = { gender: 'hombre', category: 'tenis' };
+
+  const heroCopy = {
+    hombre: { title: 'La colección para él', sub: 'Tenis y ropa seleccionados' },
+    mujer:  { title: 'La colección para ella', sub: 'Tenis y ropa seleccionados' }
+  };
+
+  function chooseGender(g){
+    state.gender = g;
+    document.body.setAttribute('data-theme', g);
+    document.getElementById('landing').classList.add('hide');
+    document.getElementById('catalog').classList.add('show');
+    document.getElementById('heroTitle').textContent = heroCopy[g].title;
+    document.getElementById('heroSub').textContent = heroCopy[g].sub;
+    loadProducts();
+  }
+
+  document.querySelectorAll('[data-choose]').forEach(btn=>{
+    btn.addEventListener('click', ()=> chooseGender(btn.dataset.choose));
+  });
+
+  document.querySelectorAll('.tab').forEach(tab=>{
+    tab.addEventListener('click', ()=>{
+      document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+      tab.classList.add('active');
+      state.category = tab.dataset.cat;
+      loadProducts();
+    });
+  });
+
+  function formatPrice(n){
+    return '$' + Number(n).toLocaleString('es-CO');
+  }
+
+  function waLink(p){
+    const msg = `Hola NOIRA, me interesa: ${p.brand} ${p.name} — ${formatPrice(p.price)}`;
+    return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
+  }
+
+  async function loadProducts(){
+    const grid = document.getElementById('grid');
+    const empty = document.getElementById('emptyState');
+    grid.innerHTML = '';
+
+    const { data, error } = await sb
+      .from('noira_products')
+      .select('*')
+      .eq('gender', state.gender)
+      .eq('category', state.category)
+      .eq('active', true)
+      .order('created_at', { ascending: false });
+
+    if(error){
+      console.error(error);
+      empty.style.display = 'block';
+      empty.textContent = 'No se pudieron cargar los productos. Intenta de nuevo.';
+      return;
+    }
+
+    if(!data || data.length === 0){
+      empty.style.display = 'block';
+      empty.textContent = 'Aún no hay productos cargados en esta categoría. Vuelve pronto.';
+      return;
+    }
+
+    empty.style.display = 'none';
+
+    data.forEach(p=>{
+      const sizes = (p.sizes && p.sizes.length) ? 'Tallas: ' + p.sizes.join(', ') : '';
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <div class="card-img" style="${p.image_url ? `background-image:url('${p.image_url}')` : ''}">
+          ${p.image_url ? '' : 'Sin imagen'}
+        </div>
+        <div class="card-body">
+          <div class="card-brand">${p.brand || ''}</div>
+          <div class="card-name">${p.name}</div>
+          <div class="card-sizes">${sizes}</div>
+          <div class="card-foot">
+            <div class="card-price">${formatPrice(p.price)}</div>
+            <a class="wa-btn" href="${waLink(p)}" target="_blank" rel="noopener">Pedir</a>
+          </div>
+        </div>`;
+      grid.appendChild(card);
+    });
+  }
+</script>
+</body>
+</html>

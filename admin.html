@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NOIRA — Panel de productos</title>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:wght@600;800&family=Work+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#101014; --surface:#1A1A20; --surface-2:#202028;
+    --text:#ECECE8; --muted:#8A8A92; --border:#2C2C34;
+    --accent:#B08A4E; --accent-2:#9A3B44; --good:#4E8C6B;
+    --font-display:'Bodoni Moda', serif;
+    --font-body:'Work Sans', sans-serif;
+    --font-mono:'JetBrains Mono', monospace;
+  }
+  *{ box-sizing:border-box; }
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:var(--font-body); min-height:100vh;
+  }
+  header{
+    padding:1.5rem 1.75rem; border-bottom:1px solid var(--border);
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  header h1{ font-family:var(--font-display); font-size:1.4rem; font-weight:800; margin:0; }
+  header a{ color:var(--muted); font-size:.8rem; text-decoration:none; }
+  main{ max-width:900px; margin:0 auto; padding:2rem 1.5rem 4rem; }
+
+  .panel{
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:8px; padding:1.75rem; margin-bottom:2rem;
+  }
+  .panel h2{ font-size:1rem; font-weight:600; margin:0 0 1.25rem; letter-spacing:.02em; }
+
+  .row{ display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem; }
+  .row.full{ grid-template-columns:1fr; }
+  label{ display:block; font-size:.72rem; color:var(--muted); letter-spacing:.06em; text-transform:uppercase; margin-bottom:.4rem; }
+  input, select, textarea{
+    width:100%; background:var(--surface-2); border:1px solid var(--border);
+    color:var(--text); padding:.65rem .75rem; border-radius:4px;
+    font-family:var(--font-body); font-size:.9rem;
+  }
+  input:focus, select:focus, textarea:focus{ outline:1px solid var(--accent); }
+  textarea{ resize:vertical; min-height:70px; }
+
+  .sizes-help{ font-size:.72rem; color:var(--muted); margin-top:.3rem; }
+
+  .file-row{ display:flex; align-items:center; gap:.75rem; }
+  .preview{
+    width:56px; height:56px; border-radius:4px; background:var(--surface-2);
+    border:1px solid var(--border); background-size:cover; background-position:center;
+    flex-shrink:0;
+  }
+
+  .submit-btn{
+    margin-top:.5rem; background:var(--accent-2); color:#fff;
+    border:none; padding:.75rem 1.6rem; border-radius:999px;
+    font-size:.8rem; font-weight:600; letter-spacing:.06em; cursor:pointer;
+  }
+  .submit-btn:hover{ opacity:.9; }
+  .submit-btn:disabled{ opacity:.5; cursor:not-allowed; }
+
+  .status{ font-size:.8rem; margin-top:.75rem; }
+  .status.ok{ color:var(--good); }
+  .status.err{ color:var(--accent-2); }
+
+  table{ width:100%; border-collapse:collapse; font-size:.82rem; }
+  th, td{ text-align:left; padding:.6rem .5rem; border-bottom:1px solid var(--border); }
+  th{ color:var(--muted); font-weight:500; font-size:.7rem; text-transform:uppercase; letter-spacing:.06em; }
+  td.price, td.cost{ font-family:var(--font-mono); }
+  .thumb{ width:36px; height:36px; border-radius:4px; background-size:cover; background-position:center; background-color:var(--surface-2); }
+  .tag{ font-size:.68rem; padding:.15rem .5rem; border-radius:999px; border:1px solid var(--border); color:var(--muted); }
+  .del-btn{ color:var(--accent-2); background:none; border:none; cursor:pointer; font-size:.75rem; }
+  .del-btn:hover{ text-decoration:underline; }
+</style>
+</head>
+<body>
+  <header>
+    <h1>NOIRA · Panel</h1>
+    <a href="index.html">Ver catálogo →</a>
+  </header>
+
+  <main>
+    <div class="panel">
+      <h2>Agregar producto</h2>
+      <form id="productForm">
+        <div class="row">
+          <div>
+            <label>Marca</label>
+            <input type="text" id="brand" required placeholder="Nike, Adidas...">
+          </div>
+          <div>
+            <label>Nombre del producto</label>
+            <input type="text" id="name" required placeholder="Air Max 90">
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label>Categoría</label>
+            <select id="category" required>
+              <option value="tenis">Tenis</option>
+              <option value="ropa">Ropa</option>
+            </select>
+          </div>
+          <div>
+            <label>Género</label>
+            <select id="gender" required>
+              <option value="hombre">Hombre</option>
+              <option value="mujer">Mujer</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label>Precio de venta (COP)</label>
+            <input type="number" id="price" required min="0" step="1000" placeholder="250000">
+          </div>
+          <div>
+            <label>Costo (COP) — uso interno</label>
+            <input type="number" id="cost" min="0" step="1000" placeholder="150000">
+          </div>
+        </div>
+
+        <div class="row full">
+          <div>
+            <label>Tallas disponibles</label>
+            <input type="text" id="sizes" placeholder="Ej: 38, 39, 40, 41">
+            <div class="sizes-help">Sepáralas con comas.</div>
+          </div>
+        </div>
+
+        <div class="row full">
+          <div>
+            <label>Imagen del producto</label>
+            <div class="file-row">
+              <div class="preview" id="preview"></div>
+              <input type="file" id="imageFile" accept="image/*">
+            </div>
+          </div>
+        </div>
+
+        <div class="row full">
+          <div>
+            <label>Descripción (opcional)</label>
+            <textarea id="description" placeholder="Detalles del producto..."></textarea>
+          </div>
+        </div>
+
+        <button type="submit" class="submit-btn" id="submitBtn">Guardar producto</button>
+        <div class="status" id="status"></div>
+      </form>
+    </div>
+
+    <div class="panel">
+      <h2>Productos cargados</h2>
+      <table>
+        <thead>
+          <tr><th></th><th>Producto</th><th>Cat.</th><th>Género</th><th>Precio</th><th>Costo</th><th></th></tr>
+        </thead>
+        <tbody id="productsTable"></tbody>
+      </table>
+    </div>
+  </main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+  const SUPABASE_URL = 'https://dwmcoigymyolmblmhwjd.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR3bWNvaWd5bXlvbG1ibG1od2pkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM4NjU3OTIsImV4cCI6MjA5OTQ0MTc5Mn0.sN0MRi27neNAusHmakwV6P44WrtDgjn9M4Ge3JbjIV8';
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  const imageFile = document.getElementById('imageFile');
+  const preview = document.getElementById('preview');
+  let uploadedUrl = null;
+
+  imageFile.addEventListener('change', async ()=>{
+    const file = imageFile.files[0];
+    if(!file) return;
+    preview.style.backgroundImage = `url('${URL.createObjectURL(file)}')`;
+
+    const status = document.getElementById('status');
+    status.textContent = 'Subiendo imagen...';
+    status.className = 'status';
+
+    const path = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.\-_]/g,'_')}`;
+    const { error } = await sb.storage.from('noira-images').upload(path, file);
+    if(error){
+      status.textContent = 'Error subiendo imagen: ' + error.message;
+      status.className = 'status err';
+      uploadedUrl = null;
+      return;
+    }
+    const { data } = sb.storage.from('noira-images').getPublicUrl(path);
+    uploadedUrl = data.publicUrl;
+    status.textContent = 'Imagen lista ✓';
+    status.className = 'status ok';
+  });
+
+  document.getElementById('productForm').addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const btn = document.getElementById('submitBtn');
+    const status = document.getElementById('status');
+    btn.disabled = true;
+
+    const sizesRaw = document.getElementById('sizes').value;
+    const sizes = sizesRaw.split(',').map(s=>s.trim()).filter(Boolean);
+
+    const payload = {
+      brand: document.getElementById('brand').value.trim(),
+      name: document.getElementById('name').value.trim(),
+      category: document.getElementById('category').value,
+      gender: document.getElementById('gender').value,
+      price: Number(document.getElementById('price').value),
+      cost: document.getElementById('cost').value ? Number(document.getElementById('cost').value) : null,
+      sizes: sizes,
+      image_url: uploadedUrl,
+      description: document.getElementById('description').value.trim() || null,
+      active: true
+    };
+
+    const { error } = await sb.from('noira_products').insert(payload);
+    btn.disabled = false;
+
+    if(error){
+      status.textContent = 'Error guardando: ' + error.message;
+      status.className = 'status err';
+      return;
+    }
+
+    status.textContent = 'Producto guardado ✓';
+    status.className = 'status ok';
+    document.getElementById('productForm').reset();
+    preview.style.backgroundImage = '';
+    uploadedUrl = null;
+    loadTable();
+  });
+
+  async function loadTable(){
+    const tbody = document.getElementById('productsTable');
+    tbody.innerHTML = '<tr><td colspan="7">Cargando...</td></tr>';
+
+    const { data, error } = await sb
+      .from('noira_products')
+      .select('*')
+      .order('created_at', { ascending:false });
+
+    if(error){
+      tbody.innerHTML = `<tr><td colspan="7">Error: ${error.message}</td></tr>`;
+      return;
+    }
+
+    if(!data || data.length === 0){
+      tbody.innerHTML = '<tr><td colspan="7">Aún no hay productos.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = '';
+    data.forEach(p=>{
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><div class="thumb" style="${p.image_url ? `background-image:url('${p.image_url}')` : ''}"></div></td>
+        <td>${p.brand} — ${p.name}</td>
+        <td><span class="tag">${p.category}</span></td>
+        <td><span class="tag">${p.gender}</span></td>
+        <td class="price">$${Number(p.price).toLocaleString('es-CO')}</td>
+        <td class="cost">${p.cost ? '$' + Number(p.cost).toLocaleString('es-CO') : '—'}</td>
+        <td><button class="del-btn" data-id="${p.id}">Eliminar</button></td>`;
+      tbody.appendChild(tr);
+    });
+
+    document.querySelectorAll('.del-btn').forEach(btn=>{
+      btn.addEventListener('click', async ()=>{
+        if(!confirm('¿Eliminar este producto?')) return;
+        await sb.from('noira_products').delete().eq('id', btn.dataset.id);
+        loadTable();
+      });
+    });
+  }
+
+  loadTable();
+</script>
+</body>
+</html>
