@@ -263,6 +263,7 @@
   body[data-theme="mujer"] .card{ background:var(--light-surface); border:1px solid var(--light-border); }
 
   .card-img{
+    position:relative;
     aspect-ratio:1/1; width:100%;
     display:flex; align-items:center; justify-content:center;
     background-size:cover; background-position:center;
@@ -270,6 +271,28 @@
   }
   body[data-theme="hombre"] .card-img{ background-color:#101014; color:var(--dark-muted); }
   body[data-theme="mujer"] .card-img{ background-color:#F3E6DF; color:var(--light-muted); }
+
+  .badge-row{ position:absolute; top:.6rem; left:.6rem; display:flex; gap:.35rem; }
+  .badge{
+    font-family:var(--font-mono); font-size:.6rem; letter-spacing:.06em;
+    text-transform:uppercase; padding:.25rem .55rem; border-radius:999px;
+    color:#fff;
+  }
+  .badge-launch{ background:#8A6A3A; }
+  .badge-sale{ background:#7A2E36; }
+
+  .video-link{
+    display:inline-block; font-size:.7rem; font-weight:600;
+    letter-spacing:.05em; margin-bottom:.6rem;
+  }
+  body[data-theme="hombre"] .video-link{ color:var(--dark-accent); }
+  body[data-theme="mujer"] .video-link{ color:var(--light-accent-2); }
+
+  .price-wrap{ display:flex; align-items:baseline; gap:.5rem; }
+  .price-old{
+    font-family:var(--font-mono); font-size:.78rem;
+    text-decoration:line-through; opacity:.55;
+  }
 
   .card-body{ padding:1rem 1.1rem 1.2rem; }
   .card-brand{
@@ -310,6 +333,102 @@
 
   @media (max-width:560px){
     .gender-picks{ flex-direction:column; align-items:center; gap:.75rem; }
+  }
+
+  /* ===================== ADMIN: botón discreto, login, panel ===================== */
+  :root{
+    --adm-bg:#121216; --adm-surface:#1B1B21; --adm-surface-2:#232329;
+    --adm-text:#ECECE8; --adm-muted:#8A8A92; --adm-border:#2C2C34;
+    --adm-accent:#A8875A; --adm-danger:#7A2E36; --adm-good:#4E8C6B;
+  }
+
+  #adminTrigger{
+    position:fixed; right:1.1rem; bottom:1.1rem; z-index:40;
+    width:30px; height:30px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-size:.85rem; color:rgba(255,255,255,.35);
+    background:rgba(0,0,0,.15); backdrop-filter:blur(6px);
+    border:1px solid rgba(255,255,255,.12);
+    transition:opacity .3s ease, color .3s ease, background .3s ease;
+    opacity:.55;
+  }
+  #adminTrigger:hover{ opacity:1; color:#D9BC85; border-color:rgba(217,188,133,.5); }
+  #adminTrigger.logged{ color:#D9BC85; border-color:rgba(217,188,133,.6); }
+
+  .adm-overlay{
+    display:none; position:fixed; inset:0; z-index:50;
+    background:rgba(10,10,12,.72); backdrop-filter:blur(4px);
+    align-items:center; justify-content:center; padding:1.25rem;
+  }
+  .adm-overlay.show{ display:flex; }
+
+  .adm-card{
+    background:var(--adm-surface); border:1px solid var(--adm-border);
+    border-radius:10px; color:var(--adm-text); font-family:var(--font-body);
+    width:100%; max-width:340px; padding:2rem 1.75rem;
+  }
+  .adm-card h2{
+    font-family:var(--font-display); font-weight:700; font-size:1.3rem;
+    margin-bottom:.3rem;
+  }
+  .adm-card .adm-sub{ font-size:.75rem; color:var(--adm-muted); margin-bottom:1.4rem; }
+  .adm-field{ margin-bottom:1rem; }
+  .adm-field label{
+    display:block; font-size:.68rem; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--adm-muted); margin-bottom:.4rem;
+  }
+  .adm-field input, .adm-field select, .adm-field textarea{
+    width:100%; background:var(--adm-surface-2); border:1px solid var(--adm-border);
+    color:var(--adm-text); padding:.6rem .7rem; border-radius:5px;
+    font-family:var(--font-body); font-size:.85rem;
+  }
+  .adm-field input:focus, .adm-field select:focus, .adm-field textarea:focus{ outline:1px solid var(--adm-accent); }
+  .adm-btn{
+    width:100%; padding:.7rem; border-radius:999px; font-size:.78rem;
+    font-weight:600; letter-spacing:.06em; background:var(--adm-accent); color:#15151A;
+  }
+  .adm-btn:hover{ opacity:.9; }
+  .adm-btn.danger{ background:var(--adm-danger); color:#fff; }
+  .adm-btn.ghost{ background:transparent; border:1px solid var(--adm-border); color:var(--adm-text); }
+  .adm-msg{ font-size:.75rem; margin-top:.8rem; min-height:1em; }
+  .adm-msg.ok{ color:var(--adm-good); }
+  .adm-msg.err{ color:#E07C87; }
+  .adm-close{ position:absolute; top:1rem; right:1.1rem; font-size:1.1rem; color:var(--adm-muted); }
+
+  .adm-panel{
+    position:relative; background:var(--adm-bg); border:1px solid var(--adm-border);
+    border-radius:10px; width:100%; max-width:980px; max-height:92vh;
+    overflow-y:auto; color:var(--adm-text); font-family:var(--font-body);
+  }
+  .adm-panel-head{
+    position:sticky; top:0; z-index:2; display:flex; align-items:center; justify-content:space-between;
+    padding:1.25rem 1.75rem; border-bottom:1px solid var(--adm-border);
+    background:var(--adm-bg);
+  }
+  .adm-panel-head h2{ font-family:var(--font-display); font-size:1.3rem; }
+  .adm-panel-head-actions{ display:flex; align-items:center; gap:.9rem; }
+  .adm-logout{ font-size:.72rem; color:var(--adm-muted); letter-spacing:.05em; }
+  .adm-logout:hover{ color:var(--adm-danger); }
+  .adm-body{ padding:1.75rem; }
+
+  .adm-grid-2{ display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+  .adm-grid-3{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:1rem; }
+  .adm-checkline{ display:flex; align-items:center; gap:.5rem; font-size:.8rem; margin-top:.3rem; }
+  .adm-checkline input{ width:auto; }
+
+  .adm-table-wrap{ margin-top:2rem; overflow-x:auto; }
+  .adm-table{ width:100%; border-collapse:collapse; font-size:.8rem; min-width:720px; }
+  .adm-table th, .adm-table td{ text-align:left; padding:.6rem .5rem; border-bottom:1px solid var(--adm-border); }
+  .adm-table th{ color:var(--adm-muted); font-size:.65rem; text-transform:uppercase; letter-spacing:.06em; }
+  .adm-thumb{ width:34px; height:34px; border-radius:4px; background-size:cover; background-position:center; background-color:var(--adm-surface-2); }
+  .adm-tag{ font-size:.65rem; padding:.15rem .5rem; border-radius:999px; border:1px solid var(--adm-border); color:var(--adm-muted); }
+  .adm-row-actions{ display:flex; gap:.6rem; }
+  .adm-row-actions button{ font-size:.72rem; color:var(--adm-accent); }
+  .adm-row-actions button.del{ color:var(--adm-danger); }
+  .adm-row-actions button:hover{ text-decoration:underline; }
+
+  @media (max-width:640px){
+    .adm-grid-2, .adm-grid-3{ grid-template-columns:1fr; }
   }
 </style>
 </head>
@@ -358,6 +477,140 @@
 
     <footer>NOIRA © 2026 — Pedidos por WhatsApp</footer>
   </section>
+
+  <!-- Botón discreto de administrador -->
+  <button id="adminTrigger" type="button" title="Administrador">◆</button>
+
+  <!-- Login -->
+  <div class="adm-overlay" id="loginOverlay">
+    <div class="adm-card" style="position:relative;">
+      <button class="adm-close" id="loginClose" type="button">✕</button>
+      <h2>Acceso NOIRA</h2>
+      <div class="adm-sub">Solo administradores</div>
+      <form id="loginForm">
+        <div class="adm-field">
+          <label>Correo</label>
+          <input type="email" id="loginEmail" required autocomplete="username">
+        </div>
+        <div class="adm-field">
+          <label>Contraseña</label>
+          <input type="password" id="loginPassword" required autocomplete="current-password">
+        </div>
+        <button type="submit" class="adm-btn" id="loginBtn">Entrar</button>
+        <div class="adm-msg" id="loginMsg"></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Panel de administración -->
+  <div class="adm-overlay" id="adminOverlay">
+    <div class="adm-panel">
+      <div class="adm-panel-head">
+        <h2>Panel NOIRA</h2>
+        <div class="adm-panel-head-actions">
+          <button class="adm-logout" id="logoutBtn" type="button">Cerrar sesión</button>
+          <button class="adm-close" id="adminClose" type="button" style="position:static;">✕</button>
+        </div>
+      </div>
+      <div class="adm-body">
+        <form id="productForm">
+          <input type="hidden" id="editingId">
+          <div class="adm-grid-2">
+            <div class="adm-field">
+              <label>Marca</label>
+              <input type="text" id="f_brand" required placeholder="Nike, Adidas...">
+            </div>
+            <div class="adm-field">
+              <label>Nombre del producto</label>
+              <input type="text" id="f_name" required placeholder="Air Max 90">
+            </div>
+          </div>
+
+          <div class="adm-grid-3">
+            <div class="adm-field">
+              <label>Categoría</label>
+              <select id="f_category" required>
+                <option value="tenis">Tenis</option>
+                <option value="ropa">Ropa</option>
+              </select>
+            </div>
+            <div class="adm-field">
+              <label>Género</label>
+              <select id="f_gender" required>
+                <option value="hombre">Hombre</option>
+                <option value="mujer">Mujer</option>
+              </select>
+            </div>
+            <div class="adm-field">
+              <label>Activo (visible en catálogo)</label>
+              <select id="f_active">
+                <option value="true">Sí</option>
+                <option value="false">No</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="adm-grid-3">
+            <div class="adm-field">
+              <label>Precio (COP)</label>
+              <input type="number" id="f_price" required min="0" step="1000" placeholder="250000">
+            </div>
+            <div class="adm-field">
+              <label>Precio de oferta (opcional)</label>
+              <input type="number" id="f_sale_price" min="0" step="1000" placeholder="199000">
+            </div>
+            <div class="adm-field">
+              <label>Costo — uso interno</label>
+              <input type="number" id="f_cost" min="0" step="1000" placeholder="150000">
+            </div>
+          </div>
+
+          <div class="adm-checkline">
+            <input type="checkbox" id="f_on_launch">
+            <label for="f_on_launch" style="margin:0; text-transform:none; font-size:.8rem; color:var(--adm-text);">Marcar como lanzamiento</label>
+          </div>
+
+          <div class="adm-field" style="margin-top:1rem;">
+            <label>Tallas disponibles</label>
+            <input type="text" id="f_sizes" placeholder="Ej: 38, 39, 40, 41">
+          </div>
+
+          <div class="adm-grid-2" style="margin-top:1rem;">
+            <div class="adm-field">
+              <label>Imagen</label>
+              <input type="file" id="f_imageFile" accept="image/*">
+              <div style="font-size:.68rem; color:var(--adm-muted); margin-top:.3rem;" id="imgStatus"></div>
+            </div>
+            <div class="adm-field">
+              <label>Video (opcional)</label>
+              <input type="file" id="f_videoFile" accept="video/*">
+              <div style="font-size:.68rem; color:var(--adm-muted); margin-top:.3rem;" id="vidStatus"></div>
+            </div>
+          </div>
+
+          <div class="adm-field">
+            <label>Descripción (opcional)</label>
+            <textarea id="f_description" style="min-height:70px;"></textarea>
+          </div>
+
+          <div style="display:flex; gap:.8rem; align-items:center;">
+            <button type="submit" class="adm-btn" id="submitBtn" style="width:auto; padding:.7rem 1.8rem;">Guardar producto</button>
+            <button type="button" class="adm-btn ghost" id="cancelEditBtn" style="width:auto; padding:.7rem 1.4rem; display:none;">Cancelar edición</button>
+          </div>
+          <div class="adm-msg" id="formMsg"></div>
+        </form>
+
+        <div class="adm-table-wrap">
+          <table class="adm-table">
+            <thead>
+              <tr><th></th><th>Producto</th><th>Cat.</th><th>Género</th><th>Precio</th><th>Estado</th><th></th></tr>
+            </thead>
+            <tbody id="adminTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
@@ -412,11 +665,10 @@
     grid.innerHTML = '';
 
     const { data, error } = await sb
-      .from('noira_products')
+      .from('noira_public_products')
       .select('*')
       .eq('gender', state.gender)
       .eq('category', state.category)
-      .eq('active', true)
       .order('created_at', { ascending: false });
 
     if(error){
@@ -436,22 +688,241 @@
 
     data.forEach(p=>{
       const sizes = (p.sizes && p.sizes.length) ? 'Tallas: ' + p.sizes.join(', ') : '';
+      const hasSale = p.sale_price && Number(p.sale_price) < Number(p.price);
+      const priceHtml = hasSale
+        ? `<span class="price-old">${formatPrice(p.price)}</span><span class="card-price">${formatPrice(p.sale_price)}</span>`
+        : `<span class="card-price">${formatPrice(p.price)}</span>`;
+      const badges = `${p.on_launch ? '<span class="badge badge-launch">Lanzamiento</span>' : ''}${hasSale ? '<span class="badge badge-sale">Oferta</span>' : ''}`;
+      const videoLink = p.video_url ? `<a class="video-link" href="${p.video_url}" target="_blank" rel="noopener">▶ Ver video</a>` : '';
       const card = document.createElement('div');
       card.className = 'card';
       card.innerHTML = `
         <div class="card-img" style="${p.image_url ? `background-image:url('${p.image_url}')` : ''}">
           ${p.image_url ? '' : 'Sin imagen'}
+          ${badges ? `<div class="badge-row">${badges}</div>` : ''}
         </div>
         <div class="card-body">
           <div class="card-brand">${p.brand || ''}</div>
           <div class="card-name">${p.name}</div>
           <div class="card-sizes">${sizes}</div>
+          ${videoLink}
           <div class="card-foot">
-            <div class="card-price">${formatPrice(p.price)}</div>
+            <div class="price-wrap">${priceHtml}</div>
             <a class="wa-btn" href="${waLink(p)}" target="_blank" rel="noopener">Pedir</a>
           </div>
         </div>`;
       grid.appendChild(card);
+    });
+  }
+
+  /* ===================== ADMIN: auth + CRUD ===================== */
+  const adminTrigger = document.getElementById('adminTrigger');
+  const loginOverlay = document.getElementById('loginOverlay');
+  const adminOverlay = document.getElementById('adminOverlay');
+
+  function openLogin(){ loginOverlay.classList.add('show'); }
+  function closeLogin(){ loginOverlay.classList.remove('show'); document.getElementById('loginMsg').textContent=''; }
+  function openAdmin(){ adminOverlay.classList.add('show'); loadAdminTable(); }
+  function closeAdmin(){ adminOverlay.classList.remove('show'); }
+
+  adminTrigger.addEventListener('click', async ()=>{
+    const { data } = await sb.auth.getSession();
+    if(data.session){ openAdmin(); } else { openLogin(); }
+  });
+  document.getElementById('loginClose').addEventListener('click', closeLogin);
+  document.getElementById('adminClose').addEventListener('click', closeAdmin);
+
+  document.getElementById('loginForm').addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const msg = document.getElementById('loginMsg');
+    const btn = document.getElementById('loginBtn');
+    btn.disabled = true;
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    const { error } = await sb.auth.signInWithPassword({ email, password });
+    btn.disabled = false;
+    if(error){
+      msg.textContent = 'Correo o contraseña incorrectos.';
+      msg.className = 'adm-msg err';
+      return;
+    }
+    msg.textContent = '';
+    document.getElementById('loginForm').reset();
+    closeLogin();
+    adminTrigger.classList.add('logged');
+    openAdmin();
+  });
+
+  document.getElementById('logoutBtn').addEventListener('click', async ()=>{
+    await sb.auth.signOut();
+    adminTrigger.classList.remove('logged');
+    closeAdmin();
+  });
+
+  sb.auth.onAuthStateChange((_event, session)=>{
+    if(session) adminTrigger.classList.add('logged');
+    else adminTrigger.classList.remove('logged');
+  });
+  sb.auth.getSession().then(({data})=>{ if(data.session) adminTrigger.classList.add('logged'); });
+
+  // --- Subida de archivos ---
+  let pendingImageUrl = null;
+  let pendingVideoUrl = null;
+
+  async function uploadToBucket(file, statusEl){
+    statusEl.textContent = 'Subiendo...';
+    const path = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.\-_]/g,'_')}`;
+    const { error } = await sb.storage.from('noira-images').upload(path, file);
+    if(error){ statusEl.textContent = 'Error: ' + error.message; return null; }
+    const { data } = sb.storage.from('noira-images').getPublicUrl(path);
+    statusEl.textContent = 'Listo ✓';
+    return data.publicUrl;
+  }
+
+  document.getElementById('f_imageFile').addEventListener('change', async (e)=>{
+    const file = e.target.files[0];
+    if(!file) return;
+    const url = await uploadToBucket(file, document.getElementById('imgStatus'));
+    if(url) pendingImageUrl = url;
+  });
+  document.getElementById('f_videoFile').addEventListener('change', async (e)=>{
+    const file = e.target.files[0];
+    if(!file) return;
+    const url = await uploadToBucket(file, document.getElementById('vidStatus'));
+    if(url) pendingVideoUrl = url;
+  });
+
+  // --- Guardar / actualizar producto ---
+  function resetForm(){
+    document.getElementById('productForm').reset();
+    document.getElementById('editingId').value = '';
+    document.getElementById('cancelEditBtn').style.display = 'none';
+    document.getElementById('submitBtn').textContent = 'Guardar producto';
+    document.getElementById('imgStatus').textContent = '';
+    document.getElementById('vidStatus').textContent = '';
+    pendingImageUrl = null;
+    pendingVideoUrl = null;
+  }
+
+  document.getElementById('cancelEditBtn').addEventListener('click', resetForm);
+
+  document.getElementById('productForm').addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const msg = document.getElementById('formMsg');
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+
+    const sizesRaw = document.getElementById('f_sizes').value;
+    const sizes = sizesRaw.split(',').map(s=>s.trim()).filter(Boolean);
+    const editingId = document.getElementById('editingId').value;
+
+    const payload = {
+      brand: document.getElementById('f_brand').value.trim(),
+      name: document.getElementById('f_name').value.trim(),
+      category: document.getElementById('f_category').value,
+      gender: document.getElementById('f_gender').value,
+      price: Number(document.getElementById('f_price').value),
+      sale_price: document.getElementById('f_sale_price').value ? Number(document.getElementById('f_sale_price').value) : null,
+      cost: document.getElementById('f_cost').value ? Number(document.getElementById('f_cost').value) : null,
+      on_launch: document.getElementById('f_on_launch').checked,
+      sizes: sizes,
+      description: document.getElementById('f_description').value.trim() || null,
+      active: document.getElementById('f_active').value === 'true'
+    };
+    if(pendingImageUrl) payload.image_url = pendingImageUrl;
+    if(pendingVideoUrl) payload.video_url = pendingVideoUrl;
+
+    let error;
+    if(editingId){
+      ({ error } = await sb.from('noira_products').update(payload).eq('id', editingId));
+    } else {
+      ({ error } = await sb.from('noira_products').insert(payload));
+    }
+    btn.disabled = false;
+
+    if(error){
+      msg.textContent = 'Error guardando: ' + error.message;
+      msg.className = 'adm-msg err';
+      return;
+    }
+
+    msg.textContent = editingId ? 'Producto actualizado ✓' : 'Producto guardado ✓';
+    msg.className = 'adm-msg ok';
+    resetForm();
+    loadAdminTable();
+  });
+
+  async function loadAdminTable(){
+    const tbody = document.getElementById('adminTable');
+    tbody.innerHTML = '<tr><td colspan="7">Cargando...</td></tr>';
+
+    const { data, error } = await sb
+      .from('noira_products')
+      .select('*')
+      .order('created_at', { ascending:false });
+
+    if(error){
+      tbody.innerHTML = `<tr><td colspan="7">Error: ${error.message}</td></tr>`;
+      return;
+    }
+    if(!data || data.length === 0){
+      tbody.innerHTML = '<tr><td colspan="7">Aún no hay productos.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = '';
+    data.forEach(p=>{
+      const tr = document.createElement('tr');
+      const priceCell = p.sale_price
+        ? `<span style="text-decoration:line-through; opacity:.5;">${formatPrice(p.price)}</span> ${formatPrice(p.sale_price)}`
+        : formatPrice(p.price);
+      tr.innerHTML = `
+        <td><div class="adm-thumb" style="${p.image_url ? `background-image:url('${p.image_url}')` : ''}"></div></td>
+        <td>${p.brand} — ${p.name}</td>
+        <td><span class="adm-tag">${p.category}</span></td>
+        <td><span class="adm-tag">${p.gender}</span></td>
+        <td>${priceCell}</td>
+        <td><span class="adm-tag">${p.active ? 'Activo' : 'Oculto'}</span></td>
+        <td>
+          <div class="adm-row-actions">
+            <button data-edit="${p.id}">Editar</button>
+            <button class="del" data-del="${p.id}">Eliminar</button>
+          </div>
+        </td>`;
+      tbody.appendChild(tr);
+    });
+
+    tbody.querySelectorAll('[data-edit]').forEach(b=>{
+      b.addEventListener('click', ()=>{
+        const p = data.find(x=>x.id === b.dataset.edit);
+        if(!p) return;
+        document.getElementById('editingId').value = p.id;
+        document.getElementById('f_brand').value = p.brand || '';
+        document.getElementById('f_name').value = p.name || '';
+        document.getElementById('f_category').value = p.category;
+        document.getElementById('f_gender').value = p.gender;
+        document.getElementById('f_price').value = p.price;
+        document.getElementById('f_sale_price').value = p.sale_price || '';
+        document.getElementById('f_cost').value = p.cost || '';
+        document.getElementById('f_on_launch').checked = !!p.on_launch;
+        document.getElementById('f_sizes').value = (p.sizes||[]).join(', ');
+        document.getElementById('f_description').value = p.description || '';
+        document.getElementById('f_active').value = p.active ? 'true' : 'false';
+        pendingImageUrl = null; pendingVideoUrl = null;
+        document.getElementById('imgStatus').textContent = p.image_url ? 'Imagen actual conservada si no subes otra' : '';
+        document.getElementById('vidStatus').textContent = p.video_url ? 'Video actual conservado si no subes otro' : '';
+        document.getElementById('cancelEditBtn').style.display = 'inline-block';
+        document.getElementById('submitBtn').textContent = 'Actualizar producto';
+        document.getElementById('productForm').scrollIntoView({ behavior:'smooth' });
+      });
+    });
+
+    tbody.querySelectorAll('[data-del]').forEach(b=>{
+      b.addEventListener('click', async ()=>{
+        if(!confirm('¿Eliminar este producto definitivamente?')) return;
+        await sb.from('noira_products').delete().eq('id', b.dataset.del);
+        loadAdminTable();
+      });
     });
   }
 </script>
