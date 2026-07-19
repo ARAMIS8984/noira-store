@@ -325,7 +325,7 @@
   .pd-img{
     width:100%; aspect-ratio:1/1; background-size:cover; background-position:center;
     display:flex; align-items:center; justify-content:center; font-size:.75rem;
-    letter-spacing:.08em; text-transform:uppercase;
+    letter-spacing:.08em; text-transform:uppercase; cursor:zoom-in;
   }
   body[data-theme="hombre"] .pd-img{ background-color:#101014; color:var(--dark-muted); }
   body[data-theme="mujer"] .pd-img{ background-color:#F3E6DF; color:var(--light-muted); }
@@ -369,6 +369,47 @@
 
   @media (max-width:640px){
     .pd-modal{ grid-template-columns:1fr; }
+  }
+
+  /* ===================== LIGHTBOX DE GALERÍA ===================== */
+  .lb-overlay{
+    display:none; position:fixed; inset:0; z-index:60;
+    background:rgba(5,5,6,.94); align-items:center; justify-content:center;
+  }
+  .lb-overlay.show{ display:flex; }
+  .lb-close{
+    position:absolute; top:1.1rem; right:1.3rem; z-index:2;
+    font-size:1.4rem; color:#fff; opacity:.8;
+  }
+  .lb-close:hover{ opacity:1; }
+  .lb-track{
+    display:flex; width:100%; height:100%;
+    overflow-x:auto; scroll-snap-type:x mandatory;
+    -webkit-overflow-scrolling:touch;
+  }
+  .lb-track::-webkit-scrollbar{ display:none; }
+  .lb-slide{
+    flex:0 0 100%; scroll-snap-align:center;
+    display:flex; align-items:center; justify-content:center;
+    padding:3rem 2rem;
+  }
+  .lb-slide img{ max-width:100%; max-height:100%; object-fit:contain; }
+  .lb-dots{
+    position:absolute; bottom:1.3rem; left:50%; transform:translateX(-50%);
+    display:flex; gap:.5rem; z-index:2;
+  }
+  .lb-dot{ width:7px; height:7px; border-radius:50%; background:rgba(255,255,255,.35); }
+  .lb-dot.active{ background:#fff; }
+  .lb-arrow{
+    position:absolute; top:50%; transform:translateY(-50%); z-index:2;
+    width:42px; height:42px; border-radius:50%; background:rgba(255,255,255,.1);
+    color:#fff; font-size:1.2rem; display:flex; align-items:center; justify-content:center;
+  }
+  .lb-arrow:hover{ background:rgba(255,255,255,.2); }
+  .lb-prev{ left:1rem; }
+  .lb-next{ right:1rem; }
+  @media (max-width:640px){
+    .lb-arrow{ display:none; }
   }
 
   .hero-strip{
@@ -667,6 +708,15 @@
 
     <footer>NOIRA © 2026 — Pedidos por WhatsApp</footer>
   </section>
+
+  <!-- Lightbox de galería -->
+  <div class="lb-overlay" id="lbOverlay">
+    <button class="lb-close" id="lbClose" type="button">✕</button>
+    <button class="lb-arrow lb-prev" id="lbPrev" type="button">‹</button>
+    <button class="lb-arrow lb-next" id="lbNext" type="button">›</button>
+    <div class="lb-track" id="lbTrack"></div>
+    <div class="lb-dots" id="lbDots"></div>
+  </div>
 
   <!-- Detalle del producto -->
   <div class="pd-overlay" id="pdOverlay">
@@ -1067,6 +1117,50 @@
   let pdSelectedColor = null;
   let pdProduct = null;
 
+  function getProductImages(p){
+    const imgs = [];
+    if(p.image_url) imgs.push(p.image_url);
+    if(p.color_images){
+      Object.values(p.color_images).forEach(url=>{
+        if(url && !imgs.includes(url)) imgs.push(url);
+      });
+    }
+    return imgs;
+  }
+
+  function openLightbox(images, startIndex){
+    if(!images.length) return;
+    const track = document.getElementById('lbTrack');
+    const dots = document.getElementById('lbDots');
+    track.innerHTML = images.map(url=>`<div class="lb-slide"><img src="${url}" alt=""></div>`).join('');
+    dots.innerHTML = images.map((_,i)=>`<div class="lb-dot${i===startIndex?' active':''}"></div>`).join('');
+    document.getElementById('lbOverlay').classList.add('show');
+    requestAnimationFrame(()=>{
+      track.scrollTo({ left: startIndex * track.clientWidth, behavior:'instant' in document.documentElement.style ? 'instant' : 'auto' });
+    });
+
+    let scrollTimeout;
+    track.onscroll = ()=>{
+      clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(()=>{
+        const idx = Math.round(track.scrollLeft / track.clientWidth);
+        dots.querySelectorAll('.lb-dot').forEach((d,i)=>d.classList.toggle('active', i===idx));
+      }, 80);
+    };
+  }
+
+  document.getElementById('lbClose').addEventListener('click', ()=>{
+    document.getElementById('lbOverlay').classList.remove('show');
+  });
+  document.getElementById('lbPrev').addEventListener('click', ()=>{
+    const track = document.getElementById('lbTrack');
+    track.scrollBy({ left: -track.clientWidth, behavior:'smooth' });
+  });
+  document.getElementById('lbNext').addEventListener('click', ()=>{
+    const track = document.getElementById('lbTrack');
+    track.scrollBy({ left: track.clientWidth, behavior:'smooth' });
+  });
+
   function openProductDetail(id){
     const p = currentProducts.find(x=>x.id === id);
     if(!p) return;
@@ -1078,6 +1172,13 @@
 
     document.getElementById('pdImg').style.backgroundImage = p.image_url ? `url('${p.image_url}')` : '';
     document.getElementById('pdImg').textContent = p.image_url ? '' : 'Sin imagen';
+    document.getElementById('pdImg').onclick = ()=>{
+      const imgs = getProductImages(p);
+      const currentBg = document.getElementById('pdImg').style.backgroundImage;
+      const currentUrl = currentBg.slice(5, -2);
+      const idx = Math.max(0, imgs.indexOf(currentUrl));
+      openLightbox(imgs, idx);
+    };
     document.getElementById('pdBrand').textContent = p.brand || '';
     document.getElementById('pdName').textContent = p.name;
     document.getElementById('pdDesc').textContent = p.description || 'Sin descripción disponible para este producto.';
