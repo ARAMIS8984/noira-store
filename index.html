@@ -446,6 +446,19 @@
   body[data-theme="hombre"] .tab.active{ color:var(--dark-text); background:var(--dark-surface); }
   body[data-theme="mujer"] .tab.active{ color:var(--light-text); background:var(--light-surface); }
 
+  .subtabs{
+    display:flex; flex-wrap:wrap; justify-content:center; gap:.45rem;
+    padding:0 1.75rem 2.2rem; margin-top:-1.2rem;
+  }
+  .subtab{
+    padding:.35rem 1rem; border-radius:999px; font-size:.68rem;
+    letter-spacing:.05em; border:1px solid;
+  }
+  body[data-theme="hombre"] .subtab{ border-color:var(--dark-border); color:var(--dark-muted); }
+  body[data-theme="mujer"] .subtab{ border-color:var(--light-border); color:var(--light-muted); }
+  body[data-theme="hombre"] .subtab.active{ background:var(--dark-accent); border-color:var(--dark-accent); color:#fff; }
+  body[data-theme="mujer"] .subtab.active{ background:var(--light-accent); border-color:var(--light-accent); color:#fff; }
+
   .grid{
     max-width:1200px; margin:0 auto;
     display:grid; grid-template-columns:repeat(auto-fill, minmax(230px,1fr));
@@ -699,9 +712,11 @@
     </div>
 
     <div class="tabs">
-      <button class="tab active" data-cat="tenis">Tenis</button>
+      <button class="tab active" data-cat="calzado">Calzado</button>
       <button class="tab" data-cat="ropa">Ropa</button>
     </div>
+
+    <div class="subtabs" id="subtabs"></div>
 
     <div class="grid" id="grid"></div>
     <div class="empty-state" id="emptyState" style="display:none;">Aún no hay productos cargados en esta categoría. Vuelve pronto.</div>
@@ -813,9 +828,13 @@
             <div class="adm-field">
               <label>Categoría</label>
               <select id="f_category" required>
-                <option value="tenis">Tenis</option>
+                <option value="calzado">Calzado</option>
                 <option value="ropa">Ropa</option>
               </select>
+            </div>
+            <div class="adm-field">
+              <label>Subcategoría</label>
+              <select id="f_subcategory"></select>
             </div>
             <div class="adm-field">
               <label>Género</label>
@@ -825,13 +844,13 @@
                 <option value="unisex">Unisex (ambos catálogos)</option>
               </select>
             </div>
-            <div class="adm-field">
-              <label>Activo (visible en catálogo)</label>
-              <select id="f_active">
-                <option value="true">Sí</option>
-                <option value="false">No</option>
-              </select>
-            </div>
+          </div>
+          <div class="adm-field" style="max-width:220px;">
+            <label>Activo (visible en catálogo)</label>
+            <select id="f_active">
+              <option value="true">Sí</option>
+              <option value="false">No</option>
+            </select>
           </div>
 
           <div class="adm-grid-3">
@@ -915,11 +934,11 @@
 
   const WHATSAPP_NUMBER = '573006586453';
 
-  let state = { gender: 'hombre', category: 'tenis' };
+  let state = { gender: 'hombre', category: 'calzado', subcategory: null };
 
   const heroCopy = {
-    hombre: { title: 'La colección para él', sub: 'Tenis y ropa seleccionados' },
-    mujer:  { title: 'La colección para ella', sub: 'Tenis y ropa seleccionados' }
+    hombre: { title: 'La colección para él', sub: 'Calzado y ropa seleccionados' },
+    mujer:  { title: 'La colección para ella', sub: 'Calzado y ropa seleccionados' }
   };
 
   function chooseGender(g){
@@ -942,14 +961,38 @@
     document.body.setAttribute('data-theme', 'neutral');
   });
 
+  const SUBCATS_PUBLIC = {
+    calzado: [ ['tenis','Tenis'], ['sandalias','Sandalias'] ],
+    ropa: [ ['deportiva','Deportiva'], ['conjuntos','Conjuntos'], ['camisetas','Camisetas'], ['pantalones','Pantalones'], ['bermudas','Bermudas'] ]
+  };
+
+  function renderSubtabs(){
+    const wrap = document.getElementById('subtabs');
+    const options = SUBCATS_PUBLIC[state.category] || [];
+    let html = `<button type="button" class="subtab${!state.subcategory ? ' active' : ''}" data-sub="">Todos</button>`;
+    html += options.map(([val,label])=>`<button type="button" class="subtab${state.subcategory===val ? ' active' : ''}" data-sub="${val}">${label}</button>`).join('');
+    wrap.innerHTML = html;
+    wrap.querySelectorAll('.subtab').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        state.subcategory = btn.dataset.sub || null;
+        renderSubtabs();
+        loadProducts();
+      });
+    });
+  }
+
   document.querySelectorAll('.tab').forEach(tab=>{
     tab.addEventListener('click', ()=>{
       document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
       tab.classList.add('active');
       state.category = tab.dataset.cat;
+      state.subcategory = null;
+      renderSubtabs();
       loadProducts();
     });
   });
+
+  renderSubtabs();
 
   function formatPrice(n){
     return '$' + Number(n).toLocaleString('es-CO');
@@ -965,12 +1008,14 @@
     const empty = document.getElementById('emptyState');
     grid.innerHTML = '';
 
-    const { data, error } = await sb
+    let query = sb
       .from('noira_public_products')
       .select('*')
       .in('gender', [state.gender, 'unisex'])
-      .eq('category', state.category)
-      .order('created_at', { ascending: false });
+      .eq('category', state.category);
+    if(state.subcategory) query = query.eq('subcategory', state.subcategory);
+
+    const { data, error } = await query.order('created_at', { ascending: false });
 
     if(error){
       console.error(error);
@@ -1349,7 +1394,7 @@
 
   // --- Tallas seleccionables según categoría ---
   const SIZE_SETS = {
-    tenis: ['34','35','36','37','38','39','40','41','42','43','44','45','46'],
+    calzado: ['34','35','36','37','38','39','40','41','42','43','44','45','46'],
     ropa: ['XS','S','M','L','XL','XXL']
   };
   let selectedSizes = [];
@@ -1357,7 +1402,7 @@
   function renderSizePicker(category, preselected){
     preselected = preselected || [];
     const wrap = document.getElementById('sizePicker');
-    const options = SIZE_SETS[category] || SIZE_SETS.tenis;
+    const options = SIZE_SETS[category] || SIZE_SETS.calzado;
     selectedSizes = options.filter(s => preselected.includes(s));
     wrap.innerHTML = options.map(s=>`<button type="button" class="size-chip${preselected.includes(s) ? ' selected' : ''}" data-size="${s}">${s}</button>`).join('');
     wrap.querySelectorAll('.size-chip').forEach(chip=>{
@@ -1370,9 +1415,25 @@
     });
   }
 
+  // --- Subcategorías dependientes de la categoría ---
+  const SUBCATS = {
+    calzado: [ ['tenis','Tenis'], ['sandalias','Sandalias'] ],
+    ropa: [ ['deportiva','Deportiva'], ['conjuntos','Conjuntos'], ['camisetas','Camisetas'], ['pantalones','Pantalones'], ['bermudas','Bermudas'] ]
+  };
+
+  function renderSubcatPicker(category, selected){
+    const sel = document.getElementById('f_subcategory');
+    const options = SUBCATS[category] || SUBCATS.calzado;
+    sel.innerHTML = options.map(([val,label])=>`<option value="${val}">${label}</option>`).join('');
+    if(selected && options.some(([val])=>val===selected)) sel.value = selected;
+  }
+
   document.getElementById('f_category').addEventListener('change', (e)=>{
     renderSizePicker(e.target.value, []);
+    renderSubcatPicker(e.target.value, null);
   });
+
+  renderSubcatPicker('calzado', null);
 
   // --- Constructor de colores con imagen por color ---
   let formColors = []; // [{ name, image_url }]
@@ -1422,7 +1483,7 @@
     renderColorList();
   });
 
-  renderSizePicker('tenis', []);
+  renderSizePicker('calzado', []);
 
   // --- Guardar / actualizar producto ---
   function resetForm(){
@@ -1436,7 +1497,8 @@
     pendingVideoUrl = null;
     formColors = [];
     renderColorList();
-    renderSizePicker('tenis', []);
+    renderSizePicker('calzado', []);
+    renderSubcatPicker('calzado', null);
   }
 
   document.getElementById('cancelEditBtn').addEventListener('click', resetForm);
@@ -1457,6 +1519,7 @@
       brand: document.getElementById('f_brand').value.trim(),
       name: document.getElementById('f_name').value.trim(),
       category: document.getElementById('f_category').value,
+      subcategory: document.getElementById('f_subcategory').value || null,
       gender: document.getElementById('f_gender').value,
       price: Number(document.getElementById('f_price').value),
       sale_price: document.getElementById('f_sale_price').value ? Number(document.getElementById('f_sale_price').value) : null,
@@ -1518,7 +1581,7 @@
       tr.innerHTML = `
         <td><div class="adm-thumb" style="${p.image_url ? `background-image:url('${p.image_url}')` : ''}"></div></td>
         <td>${p.brand} — ${p.name}</td>
-        <td><span class="adm-tag">${p.category}</span></td>
+        <td><span class="adm-tag">${p.category}${p.subcategory ? ' · ' + p.subcategory : ''}</span></td>
         <td><span class="adm-tag">${p.gender}</span></td>
         <td>${priceCell}</td>
         <td><span class="adm-tag">${p.active ? 'Activo' : 'Oculto'}</span></td>
@@ -1539,6 +1602,7 @@
         document.getElementById('f_brand').value = p.brand || '';
         document.getElementById('f_name').value = p.name || '';
         document.getElementById('f_category').value = p.category;
+        renderSubcatPicker(p.category, p.subcategory);
         document.getElementById('f_gender').value = p.gender;
         document.getElementById('f_price').value = p.price;
         document.getElementById('f_sale_price').value = p.sale_price || '';
