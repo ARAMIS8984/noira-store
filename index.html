@@ -969,12 +969,10 @@
   function renderSubtabs(){
     const wrap = document.getElementById('subtabs');
     const options = SUBCATS_PUBLIC[state.category] || [];
-    let html = `<button type="button" class="subtab${!state.subcategory ? ' active' : ''}" data-sub="">Todos</button>`;
-    html += options.map(([val,label])=>`<button type="button" class="subtab${state.subcategory===val ? ' active' : ''}" data-sub="${val}">${label}</button>`).join('');
-    wrap.innerHTML = html;
+    wrap.innerHTML = options.map(([val,label])=>`<button type="button" class="subtab${state.subcategory===val ? ' active' : ''}" data-sub="${val}">${label}</button>`).join('');
     wrap.querySelectorAll('.subtab').forEach(btn=>{
       btn.addEventListener('click', ()=>{
-        state.subcategory = btn.dataset.sub || null;
+        state.subcategory = (state.subcategory === btn.dataset.sub) ? null : btn.dataset.sub;
         renderSubtabs();
         loadProducts();
       });
